@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         }
         override fun onPostExecute(tasks:List<Task>) {
             super.onPostExecute(tasks)
-            val adapter = TaskAdapter(tasks as ArrayList<Task>)
+            val adapter = TaskAdapter(ctx,tasks as ArrayList<Task>)
             recyclerView.layoutManager=LinearLayoutManager(ctx)
             recyclerView.adapter=adapter
         }

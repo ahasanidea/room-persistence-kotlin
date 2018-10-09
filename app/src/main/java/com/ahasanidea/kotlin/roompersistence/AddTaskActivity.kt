@@ -5,10 +5,14 @@ import android.content.Intent
 import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
+import android.support.v4.content.ContextCompat.startActivity
 import android.widget.Toast
+import com.ahasanidea.kotlin.roompersistence.data.TaskDao
 import com.ahasanidea.kotlin.roompersistence.data.TaskDatabase
 import com.ahasanidea.kotlin.roompersistence.model.Task
 import kotlinx.android.synthetic.main.activity_add_task.*
+import java.lang.Exception
 
 class AddTaskActivity : AppCompatActivity() {
 
@@ -37,23 +41,27 @@ class AddTaskActivity : AppCompatActivity() {
             editTextFinishBy.requestFocus()
             return
         }
-        AsyncSaveTask(Task(task = editTextTask.text.toString(), desc = editTextDesc.text.toString(), finishedBy = editTextFinishBy.text.toString()),application).execute()
-        startActivity(Intent(this, MainActivity::class.java))
+
+        try {
+            AsyncSaveTask(TaskDatabase.getDatabase(application).taskDao()).execute(Task(task = editTextTask.text.toString(), desc = editTextDesc.text.toString(), finishedBy = editTextFinishBy.text.toString()))
+            startActivity(Intent(this, MainActivity::class.java))
+            Toast.makeText(application, "Saved", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
 
     }
 
-    class AsyncSaveTask(val task: Task,val application: Application) : AsyncTask<Void, Void, Void>() {
-         override fun doInBackground(vararg voids: Void): Void? {
+    class AsyncSaveTask(val dao:TaskDao) : AsyncTask<Task, Unit, Unit>() {
+        override fun doInBackground(vararg params: Task) {
             //adding to database
-            TaskDatabase.getDatabase(application).taskDao().insert(task)
-
-            return null
+            try {
+                dao.insert(params[0])
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
-         override fun onPostExecute(aVoid: Void) {
-            super.onPostExecute(aVoid)
-             Toast.makeText(application, "Saved", Toast.LENGTH_LONG).show()
-        }
     }
 }
